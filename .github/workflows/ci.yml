@@ -1,0 +1,27 @@
+name: Python Bootcamp CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  bootcamp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test tools
+        run: python -m pip install pytest ruff
+      - name: Check bootcamp style
+        run: python -m ruff check python-bootcamp/members
+      - name: Test TV3 Week 1
+        run: >-
+          python -m pytest -q python-bootcamp/tests/test_w1.py
+          --member ykeban2516 --variant 3
