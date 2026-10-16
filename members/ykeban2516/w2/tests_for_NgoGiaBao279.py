@@ -1,4 +1,8 @@
+# ruff: noqa: N999
+# Assignment requires the reviewee's username in the filename.
+
 from importlib import import_module
+
 import pytest
 
 
