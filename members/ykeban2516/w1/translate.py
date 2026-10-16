@@ -1,4 +1,5 @@
 def transpose(matrix):
+    """Transpose a matrix using list comprehensions."""
     if not matrix:
         return []
 
