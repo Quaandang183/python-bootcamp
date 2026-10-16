@@ -19,9 +19,26 @@ jobs:
           python-version: "3.12"
       - name: Install test tools
         run: python -m pip install pytest ruff
-      - name: Check bootcamp style
-        run: python -m ruff check python-bootcamp/members
-      - name: Test TV3 Week 1
+      - name: Check TV3 code style
         run: >-
-          python -m pytest -q python-bootcamp/tests/test_w1.py
+          python -m ruff check
+          members/ykeban2516/w1
+          members/ykeban2516/w2
+
+      - name: Test TV3 Week 1
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m pytest -q tests/test_w1.py
           --member ykeban2516 --variant 3
+
+      - name: Test TV3 Week 2
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m pytest -q tests/test_w2.py
+          --member ykeban2516
+
+      - name: Test Bao Week 1 for W2-4
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m pytest -q
+          members/ykeban2516/w2/tests_for_NgoGiaBao279.py
