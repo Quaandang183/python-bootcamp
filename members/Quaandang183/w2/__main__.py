@@ -1,6 +1,6 @@
-"""Chạy bằng: python -m members.Quaandang183.w2 [đường_dẫn_csv]
+"""Run using: python -m members.Quaandang183.w2 [csv_path]
 
-Đọc file CSV mẫu (mặc định: python-bootcamp/samples/tasks.csv) và in các task.
+Reads a sample CSV file (default: python-bootcamp/samples/tasks.csv) and prints the tasks.
 """
 import sys
 from datetime import date

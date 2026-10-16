@@ -11,9 +11,9 @@ import pytest
 @pytest.mark.parametrize(
     ("credits", "gpa", "expected"),
     [
-        (120, 2.0, True),     # đúng ngưỡng cả hai
-        (119, 2.0, False),    # thiếu 1 tín chỉ
-        (120, 1.99, False),   # GPA thấp hơn ngưỡng một chút
+        (120, 2.0, True),
+        (119, 2.0, False),
+        (120, 1.99, False),
         (200, 4.0, True),
     ],
 )
@@ -44,14 +44,14 @@ def test_top_k_orders_by_count_then_alphabet(load):
 
 
 def test_edge_top_k_zero_and_k_larger_than_vocabulary(load):
-    """EDGE CASE (không có trong test của giảng viên)."""
+    """EDGE CASE."""
     t = load("w1", "text_tools")
     assert t.top_k("x y", 0) == []
     assert t.top_k("x y", 10) == [("x", 1), ("y", 1)]
 
 
 def test_edge_punctuation_only_text_gives_empty_result(load):
-    """EDGE CASE (không có trong test của giảng viên)."""
+    """EDGE CASE."""
     t = load("w1", "text_tools")
     assert t.word_count("...!!! ?;:") == {}
     assert t.top_k("...!!!", 3) == []
@@ -74,9 +74,9 @@ def test_gcd_basic_cases(load):
     assert tr.gcd(0, 0) == 0
 
 
-@pytest.mark.xfail(strict=True, reason="gcd(12, -18) trả về -6 thay vì 6")
+@pytest.mark.xfail(strict=True, reason="gcd(12, -18) return -6 instead of 6")
 def test_edge_gcd_is_never_negative(load):
-    """EDGE CASE (không có trong test của giảng viên): ước chung phải không âm."""
+    """EDGE CASE: gcd can't be negative."""
     tr = load("w1", "translate")
     assert tr.gcd(12, -18) == 6
     assert tr.gcd(-12, -18) == 6

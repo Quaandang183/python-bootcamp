@@ -1,4 +1,3 @@
-"""W2-2: đọc CSV và ghi JSON."""
 import csv
 import json
 from dataclasses import asdict
@@ -11,10 +10,6 @@ FIELDS = ("title", "importance", "effort_h", "deadline")
 
 
 def load_tasks(path: str | Path) -> list[Task]:
-    """Đọc file CSV (header: title,importance,effort_h,deadline).
-
-    Dòng không hợp lệ sẽ raise ValueError kèm số dòng trong file.
-    """
     tasks: list[Task] = []
     with open(path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -36,7 +31,6 @@ def load_tasks(path: str | Path) -> list[Task]:
 
 
 def save_json(tasks: list[Task], path: str | Path) -> None:
-    """Ghi danh sách Task ra file JSON (deadline dạng YYYY-MM-DD)."""
     data = []
     for t in tasks:
         d = asdict(t)
