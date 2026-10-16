@@ -1,3 +1,3 @@
-title,importance,duration,deadline
-DS exam,5,6.0,2026-10-30
-Bad task,9,1.0,2026-10-30
+title,importance,effort_h,deadline
+DS exam,5,6,2026-10-30
+Invalid task,9,1,2026-10-27
