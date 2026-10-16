@@ -1,37 +1,35 @@
 import csv
-from datetime import date
+from datetime import datetime
 from shared.contract import Task
 
 def parse_csv(path: str) -> list[Task]:
-    """
-    Đọc file CSV và trả về danh sách các đối tượng Task.
-    Nếu dòng dữ liệu không hợp lệ, phát sinh ValueError kèm số dòng.
-    """
     tasks = []
     
     with open(path, mode='r', encoding='utf-8') as f:
-        # DictReader tự động đọc dòng đầu tiên làm header
-        reader = csv.DictReader(f)
+        reader = csv.reader(f)
         
-        # Bắt đầu từ dòng 2 (vì dòng 1 là header)
-        line_num = 2 
+        # Skip header row
+        next(reader, None)
         
-        for row in reader:
+        # Start counting at line 2 because line 1 is the header
+        for line_num, row in enumerate(reader, start=2):
+            if not row:
+                continue
+                
             try:
-                # Trích xuất và ép kiểu dữ liệu
-                title = row['title'].strip()
-                importance = int(row['importance'].strip())
-                effort_h = float(row['effort_h'].strip())
-                deadline = date.fromisoformat(row['deadline'].strip())
+                title = row[0].strip()
+                importance = int(row[1].strip())
+                effort_h = float(row[2].strip())
+                deadline = datetime.strptime(row[3].strip(), "%Y-%m-%d").date()
                 
-                # Khởi tạo đối tượng Task và đẩy vào mảng
-                task = Task(title=title, importance=importance, effort_h=effort_h, deadline=deadline)
-                tasks.append(task)
+                tasks.append(Task(
+                    title=title,
+                    importance=importance,
+                    effort_h=effort_h,
+                    deadline=deadline
+                ))
+            except (IndexError, ValueError) as e:
+                # Raise ValueError with the exact line number on failure
+                raise ValueError(f"Invalid data at line {line_num}: {e}") from e
                 
-            except (ValueError, KeyError) as e:
-                # Phát sinh lỗi ValueError theo yêu cầu, báo chính xác dòng bị lỗi
-                raise ValueError(f"Dữ liệu không hợp lệ tại dòng {line_num}: {e}")
-            
-            line_num += 1
-            
     return tasks
