@@ -1,48 +1,25 @@
-name: Python Bootcamp CI
+name: CI
 
 on:
-  push:
   pull_request:
-
-permissions:
-  contents: read
+  push:
+    branches: [main]
 
 jobs:
-  bootcamp:
+  test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install test tools
-        run: python -m pip install pytest ruff
+      - run: pip install -r requirements.txt
 
-      - name: Check TV3 code style
-        run: >-
-          python -m ruff check
-          members/ykeban2516/w1
-          members/ykeban2516/w2
+      - run: ruff check .
 
-      - name: Test TV3 Week 1
-        if: ${{ !cancelled() }}
-        run: >-
-          python -m pytest -q tests/test_w1.py
-          --member ykeban2516 --variant 3
+      - run: pytest -q
 
-      - name: Test TV3 Week 2
-        if: ${{ !cancelled() }}
-        run: >-
-          python -m pytest -q tests/test_w2.py
-          --member ykeban2516
-
-      - name: Test Bao Week 1 for W2-4
-        if: ${{ !cancelled() }}
-        run: >-
-          python -m pytest -q
-          members/ykeban2516/w2/tests_for_NgoGiaBao279.py
+      - name: No conflict markers
+        run: "! git grep -n -E '^(<<<<<<<|>>>>>>>)'"
