@@ -22,6 +22,10 @@ except ImportError:
 def main():
     current_dir = Path(__file__).resolve().parent
     csv_path = current_dir / "tasks.csv"
+    if not csv_path.exists():
+        sample_path = current_dir.parents[2] / "samples" / "tasks.csv"
+        if sample_path.exists():
+            csv_path = sample_path
 
     print("=" * 60)
     print("=== DEMO CHUONG TRINH QUAN LY NHIEM VU (W2 PACKAGE) ===")
