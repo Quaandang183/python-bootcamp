@@ -1,14 +1,3 @@
-"""Study planner command line with logging (Member 5, on top of Members 1 and 3).
-
-    python -m shared.study_planner samples/tasks.csv --hours 8
-    python -m shared.study_planner samples/tasks.csv --hours 8 --today 2026-10-26
-    python -m shared.study_planner samples/tasks.csv --hours 8 --verbose      # INFO steps
-    python -m shared.study_planner samples/tasks.csv --hours 8 -vv            # + DEBUG details
-
-The plan goes to stdout; log lines and errors go to stderr.
-Exit codes: 0 = ok, 1 = a problem with the data or the plan, 2 = wrong command line.
-"""
-
 import argparse
 import logging
 import sys
