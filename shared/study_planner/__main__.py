@@ -1,19 +1,19 @@
 import argparse
+import csv
 import logging
 import sys
 from datetime import date, datetime
+from math import isfinite
 from pathlib import Path
 
-# Import các module từ Tuần 2
 from shared.study_planner.allocate import allocate
-from shared.study_planner.check_feasible import check_feasible
-from shared.study_planner.parse_csv import parse_csv
+from shared.study_planner.parse import parse_csv
 from shared.study_planner.prioritise import prioritise
-from shared.study_planner.render import render
+from shared.study_planner.validate import InfeasiblePlan, check_feasible
 
 
 def setup_logging(verbose: bool) -> None:
-    """Cấu hình hệ thống logging dựa trên cờ --verbose."""
+    """Configure logging according to the verbose flag."""
     level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(
         level=level,
@@ -23,88 +23,83 @@ def setup_logging(verbose: bool) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    """Thiết lập và phân tích các tham số dòng lệnh (CLI)."""
+    """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Study Planner CLI - Công cụ lập kế hoạch học tập tự động"
+        description="Study Planner CLI - Cong cu lap ke hoach hoc tap"
     )
-
-    # Tham số bắt buộc: Đường dẫn file CSV
+    parser.add_argument("file", type=Path, help="Duong dan toi file tasks.csv")
     parser.add_argument(
-        "file",
-        type=Path,
-        help="Đường dẫn tới file tasks.csv chứa danh sách công việc",
+        "--hours", type=float, default=None, help="So gio hoc kha dung"
     )
-
-    # Tham số tùy chọn: Quỹ thời gian khả dụng (giờ)
-    parser.add_argument(
-        "--hours",
-        type=float,
-        default=None,
-        help="Số giờ học khả dụng (ví dụ: --hours 2.0)",
-    )
-
-    # Tham số tùy chọn: Ngày mốc tính toán (mặc định là hôm nay)
     parser.add_argument(
         "--today",
-        type=lambda s: datetime.strptime(s, "%Y-%m-%d").date(),
+        type=lambda value: datetime.strptime(value, "%Y-%m-%d").date(),
         default=date.today(),
-        help="Ngày mốc tính toán định dạng YYYY-MM-DD (mặc định: hôm nay)",
+        help="Ngay moc YYYY-MM-DD (mac dinh: hom nay)",
     )
-
-    # Tham số tùy chọn: Bật ghi log chi tiết
     parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Bật chế độ ghi log chi tiết (DEBUG mode)",
+        "-v", "--verbose", action="store_true", help="Bat ghi log chi tiet"
     )
-
     return parser.parse_args()
 
 
 def main() -> None:
+    """Run the planner and report expected input errors."""
     args = parse_args()
     setup_logging(args.verbose)
 
-    logging.debug("Bắt đầu khởi chạy Study Planner...")
-    logging.debug(f"Tham số nhận vào: file={args.file}, hours={args.hours}, today={args.today}")
+    if args.hours is None or not isfinite(args.hours) or args.hours <= 0:
+        logging.error("Hay nhap --hours la so huu han lon hon 0.")
+        sys.exit(2)
 
-    # Bọc try...except để xử lý ngoại lệ (Phần việc phối hợp với Thành viên 3)
+    logging.debug("Bat dau khoi chay Study Planner...")
+    logging.debug(
+        "Tham so: file=%s, hours=%s, today=%s",
+        args.file, args.hours, args.today,
+    )
+
     try:
-        # 1. Đọc dữ liệu từ file CSV
-        if not args.file.is_file():
-            raise FileNotFoundError(f"Không tìm thấy file: {args.file}")
-        
-        logging.info(f"Đang đọc dữ liệu từ {args.file}...")
+        logging.info("Dang doc du lieu tu %s...", args.file)
         tasks = parse_csv(args.file)
 
-        # 2. Kiểm tra tính khả thi của thời gian
-        logging.info("Đang kiểm tra quỹ thời gian...")
-        check_feasible(tasks, available_hours=args.hours)
+        if not tasks:
+            raise ValueError("File CSV rong hoac khong co nhiem vu.")
 
-        # 3. Sắp xếp thứ tự ưu tiên
-        logging.info("Đang sắp xếp thứ tự ưu tiên các công việc...")
+        logging.info("Dang kiem tra quy thoi gian...")
+        check_feasible(tasks, args.hours)
+
+        logging.info("Dang sap xep thu tu uu tien cac cong viec...")
         prioritised_tasks = prioritise(tasks, today=args.today)
 
-        # 4. Phân bổ khối thời gian
-        logging.info("Đang phân bổ thời gian cho các công việc...")
-        schedule = allocate(prioritised_tasks, available_hours=args.hours)
+        logging.info("Dang phan bo thoi gian cho cac cong viec...")
+        schedule = allocate(prioritised_tasks, args.hours)
 
-        # 5. Xuất chuỗi văn bản kết quả
-        logging.info("Hoàn tất lập kế hoạch. Đang xuất kết quả:")
-        output_text = render(schedule, available_hours=args.hours)
-        
-        # In kết quả ra màn hình cho người dùng
+        from shared.study_planner.render import render
+
+        logging.info("Hoan tat lap ke hoach. Dang xuat ket qua:")
+        output_text = render(schedule)
         print(output_text)
 
-    except FileNotFoundError as e:
-        logging.error(f"Lỗi tệp tin: {e}")
+    except FileNotFoundError:
+        logging.error("Khong tim thay file: %s", args.file)
         sys.exit(1)
-    except ValueError as e:
-        logging.error(f"Lỗi dữ liệu / Định dạng ngày tháng: {e}")
+    except PermissionError:
+        logging.error("Khong co quyen doc file: %s", args.file)
         sys.exit(1)
-    except Exception as e:
-        logging.error(f"Đã xảy ra lỗi không xác định: {e}")
+    except InfeasiblePlan as error:
+        logging.error(
+            "Ke hoach khong kha thi: can %gh, nhung chi co %gh.",
+            error.needed_h, error.available_h,
+        )
+        sys.exit(1)
+    except UnicodeError:
+        logging.error("Khong doc duoc ma hoa file. Hay luu CSV bang UTF-8.")
+        sys.exit(1)
+    except (ValueError, csv.Error) as error:
+        logging.error("Du lieu CSV hoac ngay thang khong hop le: %s", error)
+        sys.exit(1)
+    except OSError as error:
+        logging.error("Khong doc duoc file: %s", error)
         sys.exit(1)
 
 
