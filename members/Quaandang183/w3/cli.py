@@ -1,8 +1,4 @@
-"""W3-3: command-line study planner.
-
-Run with:
-    python -m members.Quaandang183.w3.cli tasks.csv --hours 2 --today 2026-10-26
-"""
+"""W3-3: command-line study planner."""
 
 import argparse
 import sys
