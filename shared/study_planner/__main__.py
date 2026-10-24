@@ -1,10 +1,3 @@
-"""Study planner main flow (Member 1).
-
-parse_csv -> check_feasible -> prioritise -> allocate -> render
-
-    python -m shared.study_planner samples/tasks.csv --hours 8
-"""
-
 import argparse
 import sys
 from collections.abc import Sequence
