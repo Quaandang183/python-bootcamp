@@ -7,7 +7,7 @@ except ImportError:
 class InfeasiblePlan(Exception):
     """Ngoại lệ phát sinh khi kế hoạch không khả thi (tổng thời gian cần vượt quá thời gian khả dụng)."""
 
-    def __init__(self, needed_h: float, available_h: float, message: str = None):
+    def __init__(self, needed_h: float, available_h: float, message: str | None = None):
         self.needed_h = needed_h
         self.available_h = available_h
         if message is None:
