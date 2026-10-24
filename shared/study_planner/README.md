@@ -1,29 +1,29 @@
 # Study Planner CLI Application
 
-Ứng dụng lập kế hoạch học tập tự động qua giao diện dòng lệnh (CLI). Công cụ giúp người dùng phân tích danh sách bài tập, kiểm tra tính khả thi dựa trên quỹ thời gian, tự động sắp xếp thứ tự ưu tiên và phân bổ khối thời gian học tập hợp lý.
+An automated command-line interface (CLI) application designed to generate study schedules. The tool parses task lists, verifies schedule feasibility against available study hours, prioritizes tasks based on deadlines and importance, allocates time slots, and renders a formatted output.
 
 ---
 
-## 1. Tính năng chính
+## 1. Key Features
 
-* **Đọc & Phân tích (Parse):** Đọc dữ liệu công việc từ file CSV.
-* **Kiểm tra khả thi (Feasibility Check):** Tính toán và cảnh báo nếu tổng thời gian bài tập vượt quá quỹ thời gian khả dụng.
-* **Ưu tiên công việc (Prioritization):** Sắp xếp thứ tự ưu tiên dựa trên hạn chót (due date) và mức độ quan trọng.
-* **Phân bổ thời gian (Time Allocation):** Chia nhỏ khối thời gian học tập phù hợp theo mục tiêu trong ngày.
-* **Xuất kết quả (Render):** Hiển thị lịch trình trực quan, dễ theo dõi trên Terminal.
-* **Nhật ký hệ thống (Logging):** Hỗ trợ chế độ `--verbose` giúp theo dõi luồng xử lý chi tiết.
+* **Parsing:** Read and extract task metadata from standard CSV files.
+* **Feasibility Check:** Calculate total estimated time and issue warnings if total work exceeds available daily hours.
+* **Prioritization:** Dynamically sort tasks based on due dates and impact ratings.
+* **Time Allocation:** Divide available time slots efficiently to optimize study productivity.
+* **Rendering:** Display a clean, human-readable terminal schedule.
+* **Logging & Debugging:** Provide a `--verbose` flag for step-by-step runtime execution logs.
 
 ---
 
-## 2. Cấu trúc thư mục dự án
+## 2. Directory Structure
 
 ```text
 shared/
 └── study_planner/
     ├── __init__.py
-    ├── __main__.py          # Luồng chạy chính (Quân, Trân, Khanh)
-    └── README.md            # Tài liệu hướng dẫn (Oanh)
+    ├── __main__.py          # Main execution flow (Quân, Trân, Khanh)
+    └── README.md            # Technical documentation (Oanh)
 docs/
-└── demo.md                  # Kịch bản và minh chứng chạy demo (Oanh)
+└── demo.md                  # Demo execution logs & proof of test (Oanh)
 tests/
-└── test_e2e_planner.py      # Kịch bản kiểm thử End-to-End (Bảo)
+└── test_e2e_planner.py      # End-to-End integration tests (Bảo)
