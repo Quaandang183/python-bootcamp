@@ -1,112 +1,147 @@
+"""Study planner command line with logging (Member 5, on top of Members 1 and 3).
+
+    python -m shared.study_planner samples/tasks.csv --hours 8
+    python -m shared.study_planner samples/tasks.csv --hours 8 --today 2026-10-26
+    python -m shared.study_planner samples/tasks.csv --hours 8 --verbose      # INFO steps
+    python -m shared.study_planner samples/tasks.csv --hours 8 -vv            # + DEBUG details
+
+The plan goes to stdout; log lines and errors go to stderr.
+Exit codes: 0 = ok, 1 = a problem with the data or the plan, 2 = wrong command line.
+"""
+
 import argparse
 import logging
 import sys
-from datetime import date, datetime
-from pathlib import Path
+from collections.abc import Sequence
+from datetime import date
 
-# Import các module từ Tuần 2
-from shared.study_planner.allocate import allocate
-from shared.study_planner.check_feasible import check_feasible
-from shared.study_planner.parse_csv import parse_csv
-from shared.study_planner.prioritise import prioritise
-from shared.study_planner.render import render
+from .allocate import allocate
+from .parse import parse_csv
+from .prioritise import prioritise
+from .render import render
+from .validate import InfeasiblePlan, check_feasible
 
+EXIT_OK = 0
+EXIT_ERROR = 1
 
-def setup_logging(verbose: bool) -> None:
-    """Cấu hình hệ thống logging dựa trên cờ --verbose."""
-    level = logging.DEBUG if verbose else logging.INFO
-    logging.basicConfig(
-        level=level,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        datefmt="%H:%M:%S",
-    )
+log = logging.getLogger("study_planner")
 
 
-def parse_args() -> argparse.Namespace:
-    """Thiết lập và phân tích các tham số dòng lệnh (CLI)."""
+class EmptyTasksFile(Exception):
+    """The CSV file has no task rows (empty file or header only)."""
+
+
+def setup_logging(verbosity: int) -> None:
+    """Configure logging on stderr: WARNING by default, INFO for -v, DEBUG for -vv."""
+    level = (logging.WARNING, logging.INFO, logging.DEBUG)[min(verbosity, 2)]
+    logging.basicConfig(level=level, format="%(levelname)s: %(message)s", stream=sys.stderr, force=True)
+
+
+def parse_iso_date(text: str) -> date:
+    """Argparse type for ``--today``: a date written YYYY-MM-DD."""
+    try:
+        return date.fromisoformat(text)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(f"'{text}' không phải ngày hợp lệ, cần dạng YYYY-MM-DD") from exc
+
+
+def positive_hours(text: str) -> float:
+    """Argparse type for ``--hours``: a number greater than 0."""
+    try:
+        value = float(text)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(f"'{text}' không phải là số giờ") from exc
+    if value <= 0:
+        raise argparse.ArgumentTypeError("số giờ phải lớn hơn 0")
+    return value
+
+
+def build_parser() -> argparse.ArgumentParser:
+    """Create the argument parser."""
     parser = argparse.ArgumentParser(
-        description="Study Planner CLI - Công cụ lập kế hoạch học tập tự động"
+        prog="python -m shared.study_planner",
+        description="Chia quỹ thời gian học cho các nhiệm vụ trong file CSV.",
     )
-
-    # Tham số bắt buộc: Đường dẫn file CSV
-    parser.add_argument(
-        "file",
-        type=Path,
-        help="Đường dẫn tới file tasks.csv chứa danh sách công việc",
-    )
-
-    # Tham số tùy chọn: Quỹ thời gian khả dụng (giờ)
-    parser.add_argument(
-        "--hours",
-        type=float,
-        default=None,
-        help="Số giờ học khả dụng (ví dụ: --hours 2.0)",
-    )
-
-    # Tham số tùy chọn: Ngày mốc tính toán (mặc định là hôm nay)
+    parser.add_argument("csv_path", help="CSV with header title,importance,effort_h,deadline")
+    parser.add_argument("--hours", type=positive_hours, required=True, help="số giờ học có sẵn")
     parser.add_argument(
         "--today",
-        type=lambda s: datetime.strptime(s, "%Y-%m-%d").date(),
-        default=date.today(),
-        help="Ngày mốc tính toán định dạng YYYY-MM-DD (mặc định: hôm nay)",
+        type=parse_iso_date,
+        default=None,
+        help="ngày hôm nay, YYYY-MM-DD (mặc định: ngày thật; dùng để kết quả lặp lại được)",
     )
-
-    # Tham số tùy chọn: Bật ghi log chi tiết
     parser.add_argument(
         "-v",
         "--verbose",
-        action="store_true",
-        help="Bật chế độ ghi log chi tiết (DEBUG mode)",
+        action="count",
+        default=0,
+        help="in các bước chi tiết ra stderr (-vv: thêm thông tin DEBUG)",
     )
+    return parser
 
-    return parser.parse_args()
+
+def run(csv_path: str, hours: float, today: date) -> str:
+    """Run the whole pipeline and return the plan as text.
+
+    Raises FileNotFoundError, OSError, ValueError (bad row or date),
+    EmptyTasksFile and InfeasiblePlan; main() turns them into messages.
+    """
+    log.debug("Bắt đầu: file=%s, hours=%g, today=%s", csv_path, hours, today)
+
+    tasks = parse_csv(csv_path)
+    if not tasks:
+        raise EmptyTasksFile(csv_path)
+    log.info("Đã đọc thành công %d nhiệm vụ từ file %s", len(tasks), csv_path)
+
+    check_feasible(tasks, hours)
+    needed = sum(t.effort_h for t in tasks)
+    log.info("Quỹ thời gian %gh là khả thi (cần %gh)", hours, needed)
+
+    ordered = prioritise(tasks, today)
+    log.info("Đã sắp xếp %d nhiệm vụ theo độ ưu tiên (tính từ %s)", len(ordered), today)
+    for rank, task in enumerate(ordered, start=1):
+        log.debug("  #%d %s (importance %d, hạn %s)", rank, task.title, task.importance, task.deadline)
+
+    blocks = allocate(ordered, hours)
+    log.info("Đã chia %d khối thời gian, tổng %gh", len(blocks), sum(b.hours for b in blocks))
+
+    return render(blocks)
 
 
-def main() -> None:
-    args = parse_args()
+def fail(message: str) -> int:
+    """Print a friendly error message to stderr and return the error exit code."""
+    print(f"Lỗi: {message}", file=sys.stderr)
+    return EXIT_ERROR
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """Read the command line, print the plan and return the exit code."""
+    args = build_parser().parse_args(argv)
     setup_logging(args.verbose)
+    today = args.today or date.today()
 
-    logging.debug("Bắt đầu khởi chạy Study Planner...")
-    logging.debug(f"Tham số nhận vào: file={args.file}, hours={args.hours}, today={args.today}")
-
-    # Bọc try...except để xử lý ngoại lệ (Phần việc phối hợp với Thành viên 3)
     try:
-        # 1. Đọc dữ liệu từ file CSV
-        if not args.file.is_file():
-            raise FileNotFoundError(f"Không tìm thấy file: {args.file}")
-        
-        logging.info(f"Đang đọc dữ liệu từ {args.file}...")
-        tasks = parse_csv(args.file)
+        plan = run(args.csv_path, args.hours, today)
+    except FileNotFoundError:
+        log.debug("chi tiết lỗi", exc_info=True)
+        return fail(f"không tìm thấy file '{args.csv_path}'. Hãy kiểm tra lại đường dẫn.")
+    except EmptyTasksFile:
+        return fail(f"file '{args.csv_path}' không có nhiệm vụ nào (file rỗng hoặc chỉ có dòng tiêu đề).")
+    except InfeasiblePlan as exc:
+        return fail(f"{exc}\n      Hãy tăng --hours hoặc bớt nhiệm vụ trong file.")
+    except ValueError as exc:  # bad number, bad date (YYYY-MM-DD expected) or wrong columns
+        log.debug("chi tiết lỗi", exc_info=True)
+        return fail(
+            f"dữ liệu trong '{args.csv_path}' không hợp lệ: {exc}\n"
+            "      Cần: importance là số nguyên, effort_h là số, deadline có dạng YYYY-MM-DD."
+        )
+    except OSError as exc:  # a folder, no permission, ...
+        log.debug("chi tiết lỗi", exc_info=True)
+        return fail(f"không đọc được '{args.csv_path}': {exc.strerror or exc}")
 
-        # 2. Kiểm tra tính khả thi của thời gian
-        logging.info("Đang kiểm tra quỹ thời gian...")
-        check_feasible(tasks, available_hours=args.hours)
-
-        # 3. Sắp xếp thứ tự ưu tiên
-        logging.info("Đang sắp xếp thứ tự ưu tiên các công việc...")
-        prioritised_tasks = prioritise(tasks, today=args.today)
-
-        # 4. Phân bổ khối thời gian
-        logging.info("Đang phân bổ thời gian cho các công việc...")
-        schedule = allocate(prioritised_tasks, available_hours=args.hours)
-
-        # 5. Xuất chuỗi văn bản kết quả
-        logging.info("Hoàn tất lập kế hoạch. Đang xuất kết quả:")
-        output_text = render(schedule, available_hours=args.hours)
-        
-        # In kết quả ra màn hình cho người dùng
-        print(output_text)
-
-    except FileNotFoundError as e:
-        logging.error(f"Lỗi tệp tin: {e}")
-        sys.exit(1)
-    except ValueError as e:
-        logging.error(f"Lỗi dữ liệu / Định dạng ngày tháng: {e}")
-        sys.exit(1)
-    except Exception as e:
-        logging.error(f"Đã xảy ra lỗi không xác định: {e}")
-        sys.exit(1)
+    print(plan)
+    return EXIT_OK
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
