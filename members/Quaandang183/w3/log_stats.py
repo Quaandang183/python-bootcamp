@@ -5,7 +5,7 @@ from collections import Counter, defaultdict
 
 
 def percentile95(values: list[float]) -> float:
-    """95th percentile by the nearest-rank method (``values`` must not be empty)."""
+    """Return the 95th percentile (nearest-rank) of a non-empty list."""
     ordered = sorted(values)
     rank = math.ceil(0.95 * len(ordered))
     return ordered[rank - 1]
@@ -14,9 +14,9 @@ def percentile95(values: list[float]) -> float:
 def analyse(pairs: list[tuple[str, float]]) -> dict:
     """Summarise ``(route, latency_ms)`` pairs.
 
-    Returns ``{"counts": {route: n}, "p95": {route: ms}, "slowest": route}`` where
-    ``slowest`` is the route with the highest p95 (``None`` for empty input; ties go
-    to the alphabetically first route).
+    Returns ``{"counts": {route: n}, "p95": {route: ms}, "slowest": route}``.
+    ``slowest`` is the route with the highest p95 (``None`` for empty input;
+    ties go to the alphabetically first route).
     """
     counts = Counter(route for route, _ in pairs)
     latencies: defaultdict[str, list[float]] = defaultdict(list)

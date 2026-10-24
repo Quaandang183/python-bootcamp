@@ -20,14 +20,14 @@ IN_DAYS = re.compile(r"in (\d+) days?")
 def parse_due(text: str, today: date) -> date:
     """Turn ``text`` into a date, relative to ``today``.
 
-    Accepted forms: ``2026-10-30``, ``today``, ``tomorrow``, ``in 3 days`` and weekday
-    names such as ``Fri`` or ``friday`` (the next occurrence, never today).
-    Anything else raises ValueError.
+    Accepted forms: ``2026-10-30``, ``today``, ``tomorrow``, ``in 3 days`` and
+    weekday names such as ``Fri`` or ``friday`` (the next occurrence, never
+    today). Anything else raises ValueError.
     """
     t = " ".join(text.lower().split())
 
     if ISO_DATE.fullmatch(t):
-        return date.fromisoformat(t)  # ValueError for impossible dates such as 2026-13-45
+        return date.fromisoformat(t)  # ValueError for impossible dates
     if t == "today":
         return today
     if t == "tomorrow":

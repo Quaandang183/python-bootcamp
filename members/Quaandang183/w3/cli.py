@@ -1,6 +1,7 @@
 """W3-3: command-line study planner.
 
-python -m members.<you>.w3.cli tasks.csv --hours 2 --today 2026-10-26
+Run with:
+    python -m members.Quaandang183.w3.cli tasks.csv --hours 2 --today 2026-10-26
 """
 
 import argparse
@@ -22,7 +23,7 @@ def prioritise(tasks: list[Task], today: date) -> list[Task]:
 
 
 def allocate(tasks: list[Task], hours: float) -> list[tuple[Task, float]]:
-    """Greedily give each task up to its effort until the hours run out."""
+    """Give each task up to its effort, in order, until the hours run out."""
     blocks: list[tuple[Task, float]] = []
     remaining = hours
     for task in tasks:
@@ -48,26 +49,37 @@ def render(blocks: list[tuple[Task, float]], hours: float) -> str:
 
 
 def parse_iso_date(text: str) -> date:
-    """argparse type for ``--today YYYY-MM-DD``."""
+    """Argparse type for ``--today YYYY-MM-DD``."""
     try:
         return date.fromisoformat(text)
     except ValueError as exc:
-        raise argparse.ArgumentTypeError(f"not a valid YYYY-MM-DD date: {text!r}") from exc
+        raise argparse.ArgumentTypeError(
+            f"not a valid YYYY-MM-DD date: {text!r}"
+        ) from exc
 
 
 def build_parser() -> argparse.ArgumentParser:
     """Create the argument parser."""
-    parser = argparse.ArgumentParser(prog="cli", description="Plan tonight's study hours from a tasks CSV.")
-    parser.add_argument("csv_path", type=Path, help="CSV with header title,importance,effort_h,deadline")
-    parser.add_argument("--hours", type=float, required=True, help="hours available tonight")
+    parser = argparse.ArgumentParser(
+        prog="cli", description="Plan tonight's study hours from a tasks CSV."
+    )
     parser.add_argument(
-        "--today", type=parse_iso_date, default=None, help="today's date, YYYY-MM-DD (default: real today)"
+        "csv_path", type=Path, help="CSV: title,importance,effort_h,deadline"
+    )
+    parser.add_argument(
+        "--hours", type=float, required=True, help="hours available tonight"
+    )
+    parser.add_argument(
+        "--today",
+        type=parse_iso_date,
+        default=None,
+        help="today's date, YYYY-MM-DD (default: the real date)",
     )
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Run the CLI. Returns the exit code (0 ok, 1 for a missing or invalid file)."""
+    """Run the CLI and return the exit code (1 for a missing or invalid file)."""
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.hours <= 0:
@@ -83,8 +95,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"error: invalid tasks file {args.csv_path}: {exc}", file=sys.stderr)
         return 1
 
-    plan = allocate(prioritise(tasks, today), args.hours)
-    print(render(plan, args.hours))
+    print(render(allocate(prioritise(tasks, today), args.hours), args.hours))
     return 0
 
 
