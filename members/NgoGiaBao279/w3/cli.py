@@ -1,4 +1,4 @@
-"""Command-line tool to schedule study tasks within a time budget."""
+"""Command-line tool for generating a study plan within available hours."""
 
 import argparse
 import sys
@@ -6,129 +6,94 @@ from datetime import date
 from pathlib import Path
 
 try:
+    from ..w2.io_utils import load_tasks
+    from ..w2.models import Task
+except (ImportError, ValueError):
     from members.NgoGiaBao279.w2.io_utils import load_tasks
     from members.NgoGiaBao279.w2.models import Task
-except ImportError:
-    try:
-        from ..w2.io_utils import load_tasks
-        from ..w2.models import Task
-    except ImportError:
-        from io_utils import load_tasks  # type: ignore
-        from models import Task  # type: ignore
 
 
-def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    """Parse command-line arguments.
-
-    Args:
-        argv: Optional list of argument strings.
-
-    Returns:
-        argparse.Namespace: Parsed argument namespace.
-    """
+def parse_args(args: list[str] | None = None) -> argparse.Namespace:
+    """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Allocate study tasks within available study hours."
+        description="Generate a daily study plan based on task priorities and available hours."
     )
     parser.add_argument(
         "csv_path",
-        type=str,
-        help="Path to the tasks CSV file",
+        type=Path,
+        help="Path to the tasks CSV file.",
     )
     parser.add_argument(
         "--hours",
         type=float,
         required=True,
-        help="Available study hours",
+        help="Total available study hours for tonight.",
     )
     parser.add_argument(
         "--today",
         type=date.fromisoformat,
         default=date.today(),
-        help="Current date as reference (YYYY-MM-DD, default: today)",
+        help="Reference date in YYYY-MM-DD format (default: today).",
     )
-    return parser.parse_args(argv)
+    return parser.parse_args(args)
 
 
-def allocate_tasks(
-    tasks: list[Task], hours: float, today: date
-) -> list[tuple[Task, float]]:
-    """Prioritise and allocate time blocks to tasks.
-
-    Args:
-        tasks: List of Task objects.
-        hours: Total hours available.
-        today: Reference date for urgency calculation.
-
-    Returns:
-        list[tuple[Task, float]]: Allocated tasks with their assigned hours.
-    """
-    ordered = sorted(
+def prioritise_tasks(tasks: list[Task], today: date) -> list[Task]:
+    """Sort tasks by decreasing urgency/importance ratio, preserving order on ties."""
+    return sorted(
         tasks,
         key=lambda task: task.importance / max(task.days_left(today), 1),
         reverse=True,
     )
 
-    remaining = hours
-    allocated: list[tuple[Task, float]] = []
 
-    for task in ordered:
+def allocate_time(
+    tasks: list[Task], available_hours: float
+) -> list[tuple[Task, float]]:
+    """Allocate available study hours across prioritized tasks."""
+    remaining = available_hours
+    schedule: list[tuple[Task, float]] = []
+
+    for task in tasks:
         if remaining <= 0:
             break
-        duration = getattr(task, "duration", getattr(task, "effort_h", 0.0))
-        time_to_give = min(duration, remaining)
-        if time_to_give > 0:
-            allocated.append((task, time_to_give))
-            remaining -= time_to_give
+        effort = getattr(task, "effort_h", getattr(task, "duration", 0.0))
+        time_block = min(effort, remaining)
+        if time_block > 0:
+            schedule.append((task, time_block))
+            remaining -= time_block
 
-    return allocated
+    return schedule
 
 
-def format_plan(allocated: list[tuple[Task, float]], hours: float) -> str:
-    """Format allocated tasks into a pretty table.
-
-    Args:
-        allocated: List of (Task, allocated_hours) pairs.
-        hours: Total available hours.
-
-    Returns:
-        str: Formatted plan output.
-    """
+def render_schedule(schedule: list[tuple[Task, float]], hours: float) -> str:
+    """Format the allocated study schedule as a readable string."""
     lines = [f"Tonight ({hours:.1f} h):"]
-    target_width = 28
-
-    for idx, (task, allocated_h) in enumerate(allocated, start=1):
+    for idx, (task, allocated_h) in enumerate(schedule, start=1):
         prefix = f"  {idx}. {task.title} "
-        suffix = f" {allocated_h:.1f} h"
-        dots_count = max(2, target_width - len(prefix) - len(suffix))
-        lines.append(f"{prefix}{'.' * dots_count}{suffix}")
-
+        dots = "." * max(2, 22 - len(prefix))
+        lines.append(f"{prefix}{dots} {allocated_h:.1f} h")
     return "\n".join(lines)
 
 
-def main(argv: list[str] | None = None) -> int:
-    """Run the CLI application.
+def main(args: list[str] | None = None) -> int:
+    """Run the CLI application."""
+    parsed = parse_args(args)
 
-    Args:
-        argv: Optional command-line argument list.
-
-    Returns:
-        int: Exit status code (0 for success, 1 for errors).
-    """
-    args = parse_args(argv)
-    csv_file = Path(args.csv_path)
-
-    if not csv_file.is_file():
-        sys.stderr.write(f"Error: CSV file '{args.csv_path}' not found.\n")
+    if not parsed.csv_path.is_file():
+        print(f"Error: File '{parsed.csv_path}' does not exist.", file=sys.stderr)
         return 1
 
     try:
-        tasks = load_tasks(csv_file)
-    except (OSError, ValueError, KeyError) as exc:
-        sys.stderr.write(f"Error loading tasks: {exc}\n")
+        tasks = load_tasks(parsed.csv_path)
+    except (OSError, ValueError) as err:
+        print(f"Error loading tasks from '{parsed.csv_path}': {err}", file=sys.stderr)
         return 1
 
-    allocated = allocate_tasks(tasks, args.hours, args.today)
-    print(format_plan(allocated, args.hours))
+    prioritised = prioritise_tasks(tasks, today=parsed.today)
+    schedule = allocate_time(prioritised, available_hours=parsed.hours)
+    output = render_schedule(schedule, hours=parsed.hours)
+    print(output)
     return 0
 
 

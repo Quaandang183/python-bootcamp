@@ -1,1 +1,1 @@
-"""Week 3 package for NgoGiaBao279."""
+"""Week 3 exercises package for NgoGiaBao279."""

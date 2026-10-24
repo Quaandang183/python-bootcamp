@@ -1,39 +1,37 @@
-"""Chat log latency analysis module."""
+"""Analysis module for request log latencies and counts."""
 
+import math
 from collections import Counter, defaultdict
 from collections.abc import Iterable
-from math import ceil
+from typing import Any
 
 
-def analyse(pairs: Iterable[tuple[str, float | int]]) -> dict:
-    """Analyse chat log route latencies.
+def analyse(pairs: Iterable[tuple[str, float | int]]) -> dict[str, Any]:
+    """Analyse request log pairs and compute route counts, p95 latency, and slowest route.
 
     Args:
-        pairs: Iterable of (route, latency_ms) tuples.
+        pairs: An iterable of (route, latency_ms) tuples.
 
     Returns:
-        dict: A dictionary containing:
-            - "counts": Request counts per route (Counter).
-            - "p95": 95th percentile latency per route (nearest-rank).
-            - "slowest": Route name with the highest p95 latency.
+        A dict containing:
+        - "counts": Counter of requests per route
+        - "p95": Dict mapping route to its 95th percentile latency (nearest-rank)
+        - "slowest": The route with the highest p95 latency (or None if empty)
     """
-    groups: dict[str, list[float]] = defaultdict(list)
     counts: Counter[str] = Counter()
+    route_latencies: defaultdict[str, list[float | int]] = defaultdict(list)
 
     for route, latency in pairs:
         counts[route] += 1
-        groups[route].append(float(latency))
+        route_latencies[route].append(latency)
 
     p95: dict[str, float | int] = {}
-    for route, latencies in groups.items():
-        sorted_latencies = sorted(latencies)
-        idx = ceil(0.95 * len(sorted_latencies)) - 1
-        idx = max(0, min(idx, len(sorted_latencies) - 1))
-        # Keep as int if it was originally whole number / int
-        val = sorted_latencies[idx]
-        p95[route] = int(val) if isinstance(val, float) and val.is_integer() else val
+    for route, latencies in route_latencies.items():
+        sorted_lats = sorted(latencies)
+        idx = math.ceil(0.95 * len(sorted_lats)) - 1
+        p95[route] = sorted_lats[idx]
 
-    slowest = max(p95, key=lambda r: p95[r]) if p95 else None
+    slowest = max(p95, key=p95.get) if p95 else None
 
     return {
         "counts": counts,

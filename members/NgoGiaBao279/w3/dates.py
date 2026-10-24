@@ -5,56 +5,57 @@ from datetime import date, timedelta
 
 
 def parse_due(text: str, today: date) -> date:
-    """Parse relative or absolute date strings into a date object.
+    """Parse a date string or relative deadline into a concrete date object.
 
     Accepts:
-      - ISO dates: "YYYY-MM-DD" (e.g. "2026-10-30")
-      - "today", "tomorrow"
-      - "in N days" (e.g. "in 3 days")
-      - Weekday names (e.g. "Fri", "Tue", "monday") which resolve to the
-        next occurrence strictly after `today`.
+    - ISO format: "YYYY-MM-DD" (e.g., "2026-10-30")
+    - Relative shortcuts: "today", "tomorrow"
+    - Relative offset: "in X day" / "in X days" (e.g., "in 3 days")
+    - Weekday abbreviations or names: "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
+      (always resolves to the next occurrence strictly after today)
 
     Raises:
-      ValueError: If the date format is unsupported or invalid.
+        ValueError: If text cannot be parsed or format is unknown.
     """
-    clean_text = text.strip()
-    lower_text = clean_text.lower()
+    clean_text = text.strip().lower()
 
-    if lower_text == "today":
+    if clean_text == "today":
         return today
-
-    if lower_text == "tomorrow":
+    if clean_text == "tomorrow":
         return today + timedelta(days=1)
 
-    in_days_match = re.fullmatch(r"in\s+(\d+)\s+days?", lower_text)
+    in_days_match = re.fullmatch(r"in\s+(\d+)\s+days?", clean_text)
     if in_days_match:
         days = int(in_days_match.group(1))
         return today + timedelta(days=days)
 
-    weekdays_short = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
-    weekdays_full = [
-        "monday",
-        "tuesday",
-        "wednesday",
-        "thursday",
-        "friday",
-        "saturday",
-        "sunday",
-    ]
-
-    target_weekday = None
-    if lower_text in weekdays_short:
-        target_weekday = weekdays_short.index(lower_text)
-    elif lower_text in weekdays_full:
-        target_weekday = weekdays_full.index(lower_text)
-
-    if target_weekday is not None:
-        offset = (target_weekday - today.weekday()) % 7
+    weekdays = {
+        "mon": 0,
+        "monday": 0,
+        "tue": 1,
+        "tuesday": 1,
+        "wed": 2,
+        "wednesday": 2,
+        "thu": 3,
+        "thursday": 3,
+        "fri": 4,
+        "friday": 4,
+        "sat": 5,
+        "saturday": 5,
+        "sun": 6,
+        "sunday": 6,
+    }
+    if clean_text in weekdays:
+        target_wd = weekdays[clean_text]
+        offset = (target_wd - today.weekday()) % 7
         if offset == 0:
             offset = 7
         return today + timedelta(days=offset)
 
-    try:
-        return date.fromisoformat(clean_text)
-    except ValueError as e:
-        raise ValueError(f"Unknown date format: {text!r}") from e
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", clean_text):
+        try:
+            return date.fromisoformat(clean_text)
+        except ValueError as err:
+            raise ValueError(f"Invalid date value: {text}") from err
+
+    raise ValueError(f"Unknown or unsupported date expression: {text!r}")

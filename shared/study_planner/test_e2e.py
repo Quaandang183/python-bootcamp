@@ -77,7 +77,9 @@ def test_e2e_cli_with_today_option() -> None:
     pos_assignment = result.stdout.find("Assignment")
     pos_ds_exam = result.stdout.find("DS exam")
     assert pos_assignment != -1 and pos_ds_exam != -1
-    assert pos_assignment < pos_ds_exam, "Assignment should be prioritised before DS exam"
+    assert pos_assignment < pos_ds_exam, (
+        "Assignment should be prioritised before DS exam"
+    )
 
 
 def test_e2e_cli_verbose_logging() -> None:
