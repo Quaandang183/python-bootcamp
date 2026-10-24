@@ -1,9 +1,3 @@
-"""Study planner command line: parse_csv -> prioritise -> allocate -> render.
-
-python -m shared.study_planner samples/tasks.csv --hours 2
-python -m shared.study_planner samples/tasks.csv --hours 2 --today 2026-10-26
-"""
-
 import argparse
 import sys
 from collections.abc import Sequence
