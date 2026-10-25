@@ -1,3 +1,5 @@
+"""I/O utilities for loading tasks from CSV and persisting to JSON."""
+
 import csv
 import json
 from dataclasses import asdict
@@ -8,6 +10,17 @@ from .models import Task
 
 
 def load_tasks(path) -> list[Task]:
+    """Load and validate tasks from a CSV file.
+
+    Args:
+        path: Path to the input CSV file.
+
+    Returns:
+        A list of parsed Task objects.
+
+    Raises:
+        ValueError: If header is invalid or row data cannot be parsed.
+    """
     tasks = []
 
     with Path(path).open(encoding="utf-8-sig", newline="") as source:
@@ -61,6 +74,12 @@ def load_tasks(path) -> list[Task]:
 
 
 def save_json(tasks: list[Task], path) -> None:
+    """Save a list of Task objects to a JSON file.
+
+    Args:
+        tasks: List of Task instances to serialize.
+        path: Destination file path.
+    """
     records = []
 
     for task in tasks:

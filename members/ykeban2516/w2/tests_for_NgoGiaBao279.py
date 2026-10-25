@@ -1,5 +1,6 @@
 # ruff: noqa: N999
 # Assignment requires the reviewee's username in the filename.
+"""Peer review test suite for NgoGiaBao279 Week 1 implementations."""
 
 import pytest
 
@@ -10,6 +11,7 @@ from members.NgoGiaBao279.w1.timetable import group_timetable
 
 
 def test_grade_sum_standard():
+    """Test grade summary calculation with standard score values."""
     assert grade_sum([7.5, 9, 6, 8]) == {
         "min": 6,
         "max": 9,
@@ -19,11 +21,13 @@ def test_grade_sum_standard():
 
 
 def test_grade_sum_empty():
+    """Test that calculating grade summary on an empty list raises ValueError."""
     with pytest.raises(ValueError):
         grade_sum([])
 
 
 def test_word_count():
+    """Test word count with case insensitivity and punctuation removal."""
     assert word_count("Git is fun. Git is fast!") == {
         "git": 2,
         "is": 2,
@@ -33,6 +37,7 @@ def test_word_count():
 
 
 def test_top_k_alphabetical_tie():
+    """Test top_K frequency ranking with ties resolved alphabetically."""
     assert top_K("zebra apple zebra apple", 2) == [
         ("apple", 2),
         ("zebra", 2),
@@ -40,12 +45,14 @@ def test_top_k_alphabetical_tie():
 
 
 def test_thesis_boundary():
+    """Test thesis registration eligibility boundary conditions."""
     assert can_register_thesis(120, 2.0)
     assert not can_register_thesis(119, 2.0)
     assert not can_register_thesis(120, 1.99)
 
 
 def test_missing_both_requirements():
+    """Test missing requirements report when both credits and GPA are deficient."""
     reasons = missing(100, 1.5)
     assert len(reasons) == 1
     assert "20" in reasons[0]
@@ -53,7 +60,9 @@ def test_missing_both_requirements():
 
 
 def test_timetable_sorting():
+    """Test grouping and alphabetical sorting of courses by day."""
     assert group_timetable([("Z", "Mon"), ("A", "Mon"), ("B", "Tue")]) == {
         "Mon": ["A", "Z"],
         "Tue": ["B"],
     }
+
