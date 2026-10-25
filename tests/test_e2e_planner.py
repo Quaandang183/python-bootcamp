@@ -10,15 +10,24 @@ import sys
 from datetime import date
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SHARED_DIR = REPO_ROOT / "shared"
+if str(SHARED_DIR) not in sys.path:
+    sys.path.insert(0, str(SHARED_DIR))
+
 from shared.study_planner.allocate import allocate
 from shared.study_planner.parse import parse_csv
 from shared.study_planner.prioritise import prioritise
 from shared.study_planner.render import render
 from shared.study_planner.validate import check_feasible
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
 SAMPLE_CSV = REPO_ROOT / "samples" / "tasks.csv"
-ENV = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
+ENV = {
+    **os.environ,
+    "PYTHONIOENCODING": "utf-8",
+    "PYTHONUTF8": "1",
+    "PYTHONPATH": f"{REPO_ROOT}{os.pathsep}{SHARED_DIR}{os.pathsep}{os.environ.get('PYTHONPATH', '')}".rstrip(os.pathsep),
+}
 
 
 def test_e2e_cli_valid_schedule(tmp_path: Path) -> None:
