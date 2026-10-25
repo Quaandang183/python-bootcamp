@@ -6,7 +6,14 @@ from typing import Any, Sequence
 
 
 def _calculate_p95(values: Sequence[float | int]) -> float | int:
-    """Calculate the 95th percentile value using nearest rank method."""
+    """Calculate the 95th percentile value using the nearest rank method.
+
+    Args:
+        values: A sequence of numerical values (latencies/durations).
+
+    Returns:
+        float | int: The 95th percentile value, or 0 if the sequence is empty.
+    """
     if not values:
         return 0
     sorted_values = sorted(values)
@@ -15,16 +22,16 @@ def _calculate_p95(values: Sequence[float | int]) -> float | int:
 
 
 def analyse(pairs: list[tuple[str, float | int]]) -> dict[str, Any]:
-    """Analyze service log duration records.
+    """Analyze service log duration records and compute summary metrics.
 
     Args:
         pairs: List of tuples containing (service_name, duration_ms).
 
     Returns:
-        A dictionary containing:
-        - 'counts': Count of requests per service.
-        - 'slowest': Service with the highest average execution time.
-        - 'p95': 95th percentile latency per service.
+        dict[str, Any]: A dictionary containing:
+            - 'counts': Count of requests per service.
+            - 'slowest': Service with the highest average execution time.
+            - 'p95': 95th percentile latency per service.
     """
     if not pairs:
         return {"counts": {}, "slowest": None, "p95": {}}
@@ -32,6 +39,7 @@ def analyse(pairs: list[tuple[str, float | int]]) -> dict[str, Any]:
     groups = defaultdict(list)
     counts = defaultdict(int)
 
+    # 1. Group execution durations and request counts by service name
     for service, duration in pairs:
         groups[service].append(duration)
         counts[service] += 1
@@ -40,6 +48,7 @@ def analyse(pairs: list[tuple[str, float | int]]) -> dict[str, Any]:
     highest_avg = -1.0
     slowest_service = None
 
+    # 2. Calculate average duration, identify slowest service, and compute p95 latency
     for service, durations in groups.items():
         avg_duration = sum(durations) / len(durations)
         if avg_duration > highest_avg:
