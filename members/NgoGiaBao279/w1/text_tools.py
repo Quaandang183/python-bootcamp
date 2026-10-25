@@ -1,9 +1,11 @@
+"""Text frequency counting and analysis tools."""
 
 import re
 from collections import Counter
 
 
 def word_count(s):
+    """Đếm số lần xuất hiện của các từ trong chuỗi văn bản."""
     s=s.lower()
     clean_txt =re.sub(r'[^\w\s]','',s)
     words = clean_txt.split()
@@ -11,6 +13,7 @@ def word_count(s):
     return Counter(words)
 
 def top_K(s,k):
+    """Lấy danh sách k từ xuất hiện nhiều nhất trong chuỗi văn bản."""
     counts = word_count(s)
     word_sort = sorted (counts.items(), key=lambda x: (-x[1],x[0]))
 
@@ -23,5 +26,3 @@ print(word_count(sample_text))
     
 print("\nTop 2 từ xuất hiện nhiều nhất:")
 print(top_K(sample_text, 2))
-
-

@@ -1,3 +1,5 @@
+"""Input/output utilities for task management."""
+
 import csv
 import json
 from datetime import date
@@ -8,6 +10,7 @@ except ImportError:
 
 
 def load_tasks(path) -> list[Task]:
+    """Đọc danh sách nhiệm vụ từ file CSV."""
     tasks: list[Task] = []
     with open(path, mode="r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -31,6 +34,7 @@ def load_tasks(path) -> list[Task]:
 
 
 def save_json(tasks: list[Task], path) -> None:
+    """Lưu danh sách nhiệm vụ ra file JSON."""
     data = []
     for t in tasks:
         item = {

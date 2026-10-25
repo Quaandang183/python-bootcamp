@@ -1,3 +1,6 @@
+"""Custom exceptions and validation for study planner."""
+
+
 class InfeasiblePlan(Exception):
     """Ngoại lệ phát sinh khi tổng thời gian thực hiện kế hoạch vượt quá thời gian cho phép."""
     def __init__(self, needed_h: float, available_h: float, message: str = None):

@@ -1,8 +1,10 @@
+"""Student grades analysis utilities."""
+
 import statistics
 
 
 def grade_sum(score):
-
+    """Tính các thông số thống kê (min, max, mean, median) từ danh sách điểm."""
     try :
         if not score:
             raise ValueError("Danh sách điểm số không được để trống!")
@@ -23,5 +25,3 @@ def grade_sum(score):
 
 scores_list = [8.5, 9.0, 7.5, 6.0, 8.0]
 print("Kết quả:", grade_sum(scores_list))
-
-        

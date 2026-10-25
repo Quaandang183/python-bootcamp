@@ -1,8 +1,10 @@
+"""Course timetable grouping and sorting module."""
+
 from collections import defaultdict
 
 
 def group_timetable(timetable):
-
+    """Gom nhóm các môn học theo từng ngày trong tuần và sắp xếp theo bảng chữ cái."""
     grouped = defaultdict(list)
     
     for course, day in timetable:

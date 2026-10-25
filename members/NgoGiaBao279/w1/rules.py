@@ -1,8 +1,13 @@
+"""Thesis registration rules and prerequisite checks."""
+
+
 def can_register_thesis(credits, gpa):
+    """Kiểm tra sinh viên có đủ điều kiện đăng ký luận văn tốt nghiệp hay không."""
     return credits >= 120 and gpa >= 2.0
 
 
 def missing(credits, gpa):
+    """Trả về danh sách các lý do chưa đủ điều kiện đăng ký luận văn."""
     reasons = []
 
     if credits < 120 and gpa < 2.0:
