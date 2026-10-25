@@ -14,30 +14,30 @@ def parse_due(due_str: str, today: date) -> date:
         today: The base reference date.
 
     Returns:
-        The calculated target date.
+        date: The calculated target date.
 
     Raises:
         ValueError: If the date format cannot be parsed.
     """
     clean_str = due_str.strip()
 
-    # 1. Định dạng ISO: YYYY-MM-DD
+    # 1. Standard ISO format: YYYY-MM-DD
     try:
         return date.fromisoformat(clean_str)
     except ValueError:
         pass
 
-    # 2. 'tomorrow'
+    # 2. Relative keyword: 'tomorrow'
     if clean_str.lower() == "tomorrow":
         return today + timedelta(days=1)
 
-    # 3. 'in X days'
+    # 3. Relative offset pattern: 'in X days'
     match_in_days = re.fullmatch(r"in\s+(\d+)\s+days?", clean_str, re.IGNORECASE)
     if match_in_days:
         days = int(match_in_days.group(1))
         return today + timedelta(days=days)
 
-    # 4. Thứ trong tuần (VD: Fri, Tue) - Lấy ngày tiếp theo trong tương lai
+    # 4. Weekday matching (e.g., Fri, Tue): Calculates the next upcoming weekday
     for idx, day_name in enumerate(WEEKDAYS):
         if clean_str.lower().startswith(day_name.lower()):
             days_ahead = idx - today.weekday()
