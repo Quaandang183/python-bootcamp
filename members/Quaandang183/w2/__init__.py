@@ -1,4 +1,5 @@
 """W2: Manage Task (model, read/write file, feasibility check)."""
+
 from .errors import InfeasiblePlan, check_feasible
 from .io_utils import load_tasks, save_json
 from .models import Task

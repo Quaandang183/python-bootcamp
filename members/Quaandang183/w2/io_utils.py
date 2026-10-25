@@ -1,3 +1,5 @@
+"""W2-2: read tasks from CSV and write them as JSON."""
+
 import csv
 import json
 from dataclasses import asdict
@@ -10,6 +12,11 @@ FIELDS = ("title", "importance", "effort_h", "deadline")
 
 
 def load_tasks(path: str | Path) -> list[Task]:
+    """Read a CSV with header title,importance,effort_h,deadline.
+
+    Raises FileNotFoundError for a missing file and ValueError (with the line
+    number) for a bad header or row.
+    """
     tasks: list[Task] = []
     with open(path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -31,6 +38,7 @@ def load_tasks(path: str | Path) -> list[Task]:
 
 
 def save_json(tasks: list[Task], path: str | Path) -> None:
+    """Write the tasks to ``path`` as a JSON list (deadline as an ISO string)."""
     data = []
     for t in tasks:
         d = asdict(t)
