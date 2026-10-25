@@ -3,31 +3,25 @@
 import statistics
 
 
-def summary(scores: list[float]) -> dict[str, float]:
-    """Calculate statistical summary (min, max, mean, median) for a list of scores.
+def grade_sum(score):
+    """Tính các thông số thống kê (min, max, mean, median) từ danh sách điểm."""
+    try :
+        if not score:
+            raise ValueError("Danh sách điểm số không được để trống!")
+        
 
-    Args:
-        scores: A list of numeric score values.
+        result = {
+            "min": round(min(score),2),
+            "max": round (max (score),2),
+            "mean": round (sum(score)/ len(score) , 2),
+            "median": round(statistics.median(score),2),
+        }
 
-    Returns:
-        A dictionary containing "min", "max", "mean", and "median" rounded to 2 decimals.
+        return result
+    
+    except ValueError as e :
+       print(f"lôi{e}")
+       raise
 
-    Raises:
-        ValueError: If scores list is empty.
-    """
-    if not scores:
-        raise ValueError("Danh sách điểm số không được để trống!")
-
-    return {
-        "min": round(float(min(scores)), 2),
-        "max": round(float(max(scores)), 2),
-        "mean": round(float(sum(scores) / len(scores)), 2),
-        "median": round(float(statistics.median(scores)), 2),
-    }
-
-
-grade_sum = summary
-
-if __name__ == "__main__":
-    scores_list = [8.5, 9.0, 7.5, 6.0, 8.0]
-    print("Kết quả:", summary(scores_list))
+scores_list = [8.5, 9.0, 7.5, 6.0, 8.0]
+print("Kết quả:", grade_sum(scores_list))

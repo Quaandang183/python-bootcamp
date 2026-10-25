@@ -1,46 +1,26 @@
 """Thesis registration rules and prerequisite checks."""
 
-import inspect
 
-MIN_CREDITS = 120
-MIN_GPA = 2.0
-
-
-def can_register_thesis(credits: int, gpa: float) -> bool:
-    """Check if student meets minimum credit and GPA criteria to register a thesis.
-
-    Args:
-        credits: Total completed academic credits.
-        gpa: Cumulative Grade Point Average.
-
-    Returns:
-        True if eligible, False otherwise.
-    """
-    return credits >= MIN_CREDITS and gpa >= MIN_GPA
+def can_register_thesis(credits, gpa):
+    """Kiểm tra sinh viên có đủ điều kiện đăng ký luận văn tốt nghiệp hay không."""
+    return credits >= 120 and gpa >= 2.0
 
 
-def missing(credits: int, gpa: float) -> list[str]:
-    """List unmet criteria for registering a thesis.
+def missing(credits, gpa):
+    """Trả về danh sách các lý do chưa đủ điều kiện đăng ký luận văn."""
+    reasons = []
 
-    Args:
-        credits: Total completed academic credits.
-        gpa: Cumulative Grade Point Average.
+    if credits < 120 and gpa < 2.0:
+        reasons.append(
+            f"Bạn cần hoàn thành thêm {120 - credits} tín chỉ và nâng GPA lên ít nhất 2.0 để đủ điều kiện đăng ký luận văn."
+        )
+    elif credits < 120:
+        reasons.append(
+            f"Bạn cần hoàn thành thêm {120 - credits} tín chỉ để đủ điều kiện đăng ký luận văn."
+        )
+    elif gpa < 2.0:
+        reasons.append("Bạn cần nâng GPA lên ít nhất 2.0 để đủ điều kiện đăng ký luận văn.")
 
-    Returns:
-        A list of missing condition strings, or an empty list if fully eligible.
-    """
-    # Check if called from partner peer test (W2-4 tests_for_NgoGiaBao279)
-    for frame in inspect.stack():
-        if "tests_for_NgoGiaBao279" in frame.filename:
-            if credits < MIN_CREDITS and gpa < MIN_GPA:
-                return [f"need {MIN_CREDITS - credits} more credits and GPA >= {MIN_GPA}"]
-            break
-
-    reasons: list[str] = []
-    if credits < MIN_CREDITS:
-        reasons.append(f"need {MIN_CREDITS - credits} more credits")
-    if gpa < MIN_GPA:
-        reasons.append(f"need GPA of at least {MIN_GPA} (currently {gpa})")
     return reasons
 
 

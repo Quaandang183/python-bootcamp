@@ -1,33 +1,29 @@
-"""Course timetable organization and grouping utilities."""
+"""Course timetable grouping and sorting module."""
 
 from collections import defaultdict
 
 
-def by_day(timetable: list[tuple[str, str]]) -> dict[str, list[str]]:
-    """Group courses by day of the week, with course codes sorted alphabetically.
-
-    Args:
-        timetable: A list of (course_code, day_name) tuples.
-
-    Returns:
-        A dictionary mapping each day to its sorted list of course codes.
-    """
-    grouped: defaultdict[str, list[str]] = defaultdict(list)
+def group_timetable(timetable):
+    """Gom nhóm các môn học theo từng ngày trong tuần và sắp xếp theo bảng chữ cái."""
+    grouped = defaultdict(list)
+    
     for course, day in timetable:
         grouped[day].append(course)
-
+        
     for day in grouped:
         grouped[day].sort()
-
+        
     return dict(grouped)
 
 
-group_timetable = by_day
-
 if __name__ == "__main__":
     sample_timetable = [
-        ("CSC10014", "Mon"),
-        ("MTH00003", "Tue"),
-        ("CSC10001", "Mon"),
+        ("Math", "Monday"),
+        ("Physics", "Tuesday"),
+        ("English", "Monday"),
+        ("Chemistry", "Wednesday"),
+        ("Programming", "Tuesday")
     ]
-    print(by_day(sample_timetable))
+    
+    result = group_timetable(sample_timetable)
+    print (result)

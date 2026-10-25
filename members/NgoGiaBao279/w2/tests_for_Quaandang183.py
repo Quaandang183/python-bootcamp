@@ -1,6 +1,6 @@
-# ruff: noqa: N999
-import sys
 from pathlib import Path
+import sys
+import pytest
 
 current_file = Path(__file__).resolve()
 possible_bootcamp_roots = [
