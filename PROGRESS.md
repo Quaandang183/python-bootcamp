@@ -13,8 +13,8 @@
 | htoanh2514-dot | w2 | #26 | #31 | pbtran2524-lab | 5/5 | 3 |
 | pbtran2524-lab | w2 | #27 | #37 | Quaandang183 | 5/5 | 3 |
 | **WEEK 3** | | | | | | |
-| Quaandang183 | w3 | #41 | #50 | NgoGiaBao279 | 5/5 | 3 |
-| NgoGiaBao279 | w3 | #42 | #59  | ykeban2516 | 5/5 | 3 |
-| ykeban2516 | w3 | #43 | #53 | htoanh2514-dot | 5/5 | 3 |
-| htoanh2514-dot | w3 | #44 | #54 | pbtran2524-lab | 5/5 | 3 |
-| pbtran2524-lab | w3 | #45 | #46 | Quaandang183 | 5/5 | 3 |
+| Quaandang183 | w3 | #41 | #50 | NgoGiaBao279 | 3/3 | 3 |
+| NgoGiaBao279 | w3 | #42 | #59  | ykeban2516 | 3/3 | 3 |
+| ykeban2516 | w3 | #43 | #53 | htoanh2514-dot | 3/3 | 3 |
+| htoanh2514-dot | w3 | #44 | #54 | pbtran2524-lab | 3/3 | 3 |
+| pbtran2524-lab | w3 | #45 | #46 | Quaandang183 | 3/3 | 3 |
