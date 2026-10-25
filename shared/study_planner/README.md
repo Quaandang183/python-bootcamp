@@ -17,13 +17,16 @@ An automated command-line interface (CLI) application designed to generate study
 
 ## 2. Directory Structure
 
-```text
-shared/
-└── study_planner/
-    ├── __init__.py
-    ├── __main__.py          # Main execution flow (Quân, Trân, Khanh)
-    └── README.md            # Technical documentation (Oanh)
-docs/
-└── demo.md                  # Demo execution logs & proof of test (Oanh)
-tests/
-└── test_e2e_planner.py      # End-to-End integration tests (Bảo)
+├── docs/
+│   └── demo.md          # Demo execution logs & scenario proofs
+├── shared/              # Shared team code directory
+│   ├── contract.py      # Data models & contract definitions
+│   └── study_planner/   # Study Planner core module
+│       ├── README.md    # Application documentation & CLI guide
+│       ├── __main__.py  # CLI entry point & execution flow
+│       ├── allocate.py  # Time slot allocation logic
+│       ├── parse.py     # CSV task parser module
+│       ├── prioritise.py# Task sorting & priority calculator
+│       ├── render.py    # Console schedule renderer
+│       └── validate.py  # Feasibility & constraint validator
+└── tests/               # Integration & E2E test scripts
