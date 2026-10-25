@@ -1,25 +1,26 @@
+"""CLI entry point demonstration for Week 2 Task manager."""
+
+import sys
 from datetime import date
 from pathlib import Path
-import sys
 
 # Ensure UTF-8 output on Windows consoles
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     try:
         sys.stdout.reconfigure(encoding="utf-8")
-    except Exception:
+    except (AttributeError, OSError):
         pass
 
 try:
-    from .models import Task
-    from .io_utils import load_tasks, save_json
     from .errors import InfeasiblePlan, check_feasible
+    from .io_utils import load_tasks, save_json
 except ImportError:
-    from models import Task
-    from io_utils import load_tasks, save_json
     from errors import InfeasiblePlan, check_feasible
+    from io_utils import load_tasks, save_json
 
 
-def main():
+def main() -> None:
+    """Execute demo workflow: load tasks, check feasibility, and persist to JSON."""
     current_dir = Path(__file__).resolve().parent
     csv_path = current_dir / "tasks.csv"
     if not csv_path.exists():
@@ -49,7 +50,7 @@ def main():
     print("-" * 80)
     for idx, t in enumerate(tasks, start=1):
         remaining = t.days_left(today)
-        print(f"{idx:<4} | {t.title:<22} | {t.importance:<10} | {t.duration:<10.1f} | {str(t.deadline):<12} | {remaining} ngay")
+        print(f"{idx:<4} | {t.title:<22} | {t.importance:<10} | {t.duration:<10.1f} | {t.deadline!s:<12} | {remaining} ngay")
     print("-" * 80)
 
     # Kiem tra tinh kha thi
