@@ -1,3 +1,10 @@
+"""Unit test suite for Sieve of Eratosthenes prime generation.
+
+This module dynamically imports the `sieve_of_eratosthenes` implementation from a member's
+Week 1 directory or falls back to a local reference implementation. It validates correctness
+across standard ranges, prime boundaries, composite numbers, and edge-case inputs using pytest.
+"""
+
 import sys
 from pathlib import Path
 import pytest
@@ -16,6 +23,14 @@ except ImportError:
         from translate import sieve as sieve_of_eratosthenes
     except ImportError:
         def sieve_of_eratosthenes(n: int) -> list[int]:
+            """Fallback reference implementation of the Sieve of Eratosthenes algorithm.
+
+            Args:
+                n (int): The upper limit (inclusive) up to which primes are generated.
+
+            Returns:
+                list[int]: A list of all prime numbers less than or equal to n.
+            """
             if n < 2:
                 return []
             is_prime = [True] * (n + 1)
