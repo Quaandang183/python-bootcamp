@@ -1,7 +1,9 @@
-"""Run using: python -m members.Quaandang183.w2 [csv_path]
+"""Print the tasks of a CSV file.
 
-Reads a sample CSV file (default: python-bootcamp/samples/tasks.csv) and prints the tasks.
+Run using: python -m members.Quaandang183.w2 [csv_path]
+The default file is samples/tasks.csv.
 """
+
 import sys
 from datetime import date
 from pathlib import Path
@@ -12,6 +14,7 @@ DEFAULT_CSV = Path(__file__).resolve().parents[3] / "samples" / "tasks.csv"
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Print the tasks of a CSV file and return the exit code (1 on error)."""
     args = sys.argv[1:] if argv is None else argv
     path = Path(args[0]) if args else DEFAULT_CSV
     try:

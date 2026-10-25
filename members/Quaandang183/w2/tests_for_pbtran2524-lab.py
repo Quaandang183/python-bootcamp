@@ -1,8 +1,10 @@
+# ruff: noqa: N999
 """Extra tests for the W1 modules (grades, rules, text_tools, timetable, translate).
 
 Run with:
     pytest -v python-bootcamp/tests/test_w1_extra.py --member <your_folder>
 """
+
 import pytest
 
 
