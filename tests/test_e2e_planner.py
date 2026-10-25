@@ -1,8 +1,3 @@
-"""End-to-end integration test suite for the shared study planner CLI.
-
-Author: NgoGiaBao279 (TV2 - E2E Tester)
-Task: Kỹ sư kiểm thử tích hợp (E2E Tester)
-"""
 
 import os
 import subprocess
