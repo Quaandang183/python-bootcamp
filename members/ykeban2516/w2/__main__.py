@@ -1,4 +1,4 @@
-﻿"""Run using: python -m members.ykeban2516.w2 [csv_path]
+"""Run using: python -m members.ykeban2516.w2 [csv_path]
 
 Loads a sample CSV file and prints the task list.
 """
@@ -13,6 +13,14 @@ DEFAULT_CSV = Path(__file__).resolve().parents[3] / "samples" / "tasks.csv"
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Run CLI to load tasks from CSV and print task details and total effort.
+
+    Args:
+        argv: Optional command line arguments. Defaults to sys.argv[1:].
+
+    Returns:
+        0 on success, 1 on error.
+    """
     args = sys.argv[1:] if argv is None else argv
     path = Path(args[0]) if args else DEFAULT_CSV
 

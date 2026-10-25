@@ -12,7 +12,17 @@ LOGGER = logging.getLogger(__name__)
 
 
 def positive_hours(value: str) -> float:
-    """Validate a finite, positive hour budget for argparse."""
+    """Validate a finite, positive hour budget for argparse.
+
+    Args:
+        value: String representation of hour budget.
+
+    Returns:
+        Validated float hour value.
+
+    Raises:
+        argparse.ArgumentTypeError: If value is non-numeric, non-finite, or <= 0.
+    """
     try:
         hours = float(value)
     except ValueError as error:
@@ -23,7 +33,14 @@ def positive_hours(value: str) -> float:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Return zero on success and one for input-file or task-data errors."""
+    """Execute study planner CLI to load tasks and generate a prioritized plan.
+
+    Args:
+        argv: Command-line argument sequence, or None for sys.argv[1:].
+
+    Returns:
+        0 on success, or 1 if input file or task data is invalid.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("csv_path")
     parser.add_argument("--hours", required=True, type=positive_hours)

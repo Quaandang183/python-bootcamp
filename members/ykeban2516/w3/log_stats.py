@@ -6,7 +6,20 @@ from math import ceil, isfinite
 
 
 def analyse(pairs: Iterable[tuple[str, float]]) -> dict:
-    """Use nearest-rank P95 and mean latency to identify the slowest intent."""
+    """Use nearest-rank P95 and mean latency to identify the slowest intent.
+
+    Args:
+        pairs: Iterable of (intent, latency) pairs.
+
+    Returns:
+        A dictionary containing:
+            - 'counts': Dictionary mapping each intent to its occurrence count.
+            - 'p95': Dictionary mapping each intent to its 95th percentile latency.
+            - 'slowest': Intent string with the highest average latency, or None.
+
+    Raises:
+        ValueError: If intent is empty or latency is not a finite non-negative number.
+    """
     groups = defaultdict(list)
     for intent, latency in pairs:
         if not isinstance(intent, str) or not intent.strip():

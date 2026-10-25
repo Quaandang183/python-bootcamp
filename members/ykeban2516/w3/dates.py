@@ -5,7 +5,18 @@ from datetime import date, timedelta
 
 
 def parse_due(text: str, today: date) -> date:
-    """Resolve a deadline; weekday names always mean the next occurrence."""
+    """Resolve a deadline; weekday names always mean the next occurrence.
+
+    Args:
+        text: String describing deadline ('today', 'tomorrow', 'in N days', weekday, or 'YYYY-MM-DD').
+        today: Baseline reference date.
+
+    Returns:
+        The calculated deadline as a date object.
+
+    Raises:
+        ValueError: If text does not match any supported deadline format.
+    """
     value = text.strip().lower()
     if value == "today":
         return today
