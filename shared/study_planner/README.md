@@ -29,4 +29,5 @@ An automated command-line interface (CLI) application designed to generate study
 │       ├── prioritise.py# Task sorting & priority calculator
 │       ├── render.py    # Console schedule renderer
 │       └── validate.py  # Feasibility & constraint validator
-└── tests/               # Integration & E2E test scripts
+└── tests/
+   └── test_e2e_planner.py        
